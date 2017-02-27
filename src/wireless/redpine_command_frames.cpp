@@ -235,7 +235,30 @@ void DnsResolutionFrame::responsePayloadHandler(uint8_t *databuffer)
 
     ipVersion = resp->ip_version;
 }
+// MARK: TCP SERVER SOCKET Frame
 
+void TcpServerFrame::TcpServerFrame(int port) : ManagementFrame(SocketCreate)
+{
+  this->responsePayload = true;
+  this->port = port;
+}
+int payloadLength()
+{
+  // beregn størrelsen på payload struct'en
+  // fra side 157 i manualen
+  return 10;
+}
+
+void payloadData(uint_t *data)
+{
+  // data er en pointer til det memory som skal indeholde
+  // structen fra side 157 i manualen.
+  // cast data til struct typen eller kopier fra en lokal
+  // kopi.
+
+  struct payloadStruct *payload = (struct payloadStruct*) data;
+  // ...
+}
 
 // MARK: HTTP GET Frame
 
@@ -421,5 +444,3 @@ void SetSleepTimerFrame::dataPayload(uint8_t *data)
 {
     memcpy(data, &frame, sizeof(struct SleepTimerFrameSnd));
 }
-
-

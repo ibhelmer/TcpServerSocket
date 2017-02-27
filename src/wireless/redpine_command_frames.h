@@ -530,7 +530,7 @@ namespace mono { namespace redpine {
      * the socket port for remote connection from a client socket.
      * After recieving a remote connection from a client socket, the server
      * will established the communication channel and data can be passed
-     * between the client and the server.
+     * between the client and the server.git push origin master:master
      * The connection is closed by the client and the server will remove
      * the communication channel when it reciev a close from the client.
      *
@@ -542,40 +542,11 @@ namespace mono { namespace redpine {
     {
       public:
         int port;
-        TcpServerFrame(int port) : ManagementFrame(SocketCreate)
-        {
-          this->responsePayload = true;
-          this->port = port;
-        }
-
-      int payloadLength()
-      {
-        // beregn størrelsen på payload struct'en
-        // fra side 157 i manualen
-        return ?;
-      }
-
-      void payloadData(uint_t *data)
-      {
-        // data er en pointer til det memory som skal indeholde
-        // structen fra side 157 i manualen.
-        // cast data til struct typen eller kopier fra en lokal
-        // kopi.
-
-        struct payloadStruct *payload = (struct payloadStruct*) data;
-        // ...
-      }
-
-      void responsePayloadHandler(uint_t *data)
-      {
-        // her kommer tcp socket create respons
-        // data pointeren indholder svar fra modulet, som angivet
-        // på side 161 i manualen.
-
-        struct svarStruct *resp = (struct svarStruct*) data;
-
-        // ...
-      }
+        TcpServerFrame(int port);
+        int payloadLength();
+        void payloadData(uint_t *data);
+        void responsePayloadHandler(uint_t *data);
+      
     };
 
     /**
