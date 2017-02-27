@@ -10,15 +10,15 @@
 #include <FileSystemLike.h>
 
 namespace mono { namespace redpine {
-    
+
     /**
      * A Set Operating Mode management frame with the needed command payload data.
-     * 
+     *
      */
     class SetOperatingModeFrame : public ManagementFrame
     {
     public:
-        
+
         /** Operating modes for wifi */
         enum WifiOperModes
         {
@@ -28,7 +28,7 @@ namespace mono { namespace redpine {
             WIFI_ACCESS_POINT= 6, /**< The module acts as an Access Point */
             WIFI_PER_MODE    = 8  /**< This mode is used for calculating packet error rate and mostly used during RF certification tests. */
         };
-        
+
         /** Co-Existence modes */
         enum CoexModes
         {
@@ -37,7 +37,7 @@ namespace mono { namespace redpine {
             COEX_WIFI_BT    = 4, /**< Wifi and Bluetooth Classic is enabled no TCP/IP */
             COEX_WIFI_BLE   = 0xC/**< Wifi and Bluetooth LE is enabled, no TCP/IP */
         };
-        
+
         /** Feature bitmap defines, OR these together to det features */
         enum Features
         {
@@ -49,7 +49,7 @@ namespace mono { namespace redpine {
             USE_ULP_GPIO_1_AS_WAKEUP= 0x20, /**< Use GPIO 1 on ULP, instead of GPIO 21 */
             USE_3V3_RF_VOLTAGE      = 0x40, /**< Use 3.3V RF voltage, instead of 1.9V  */
         };
-        
+
         /** Feature bitmap for TCP/IP */
         enum TcpIpFeatures
         {
@@ -68,7 +68,7 @@ namespace mono { namespace redpine {
             ENABLE_HTTPS_SERVER     = 0x1000, /**<  */
             SEND_CONFIG_TO_HOST     = 0x4000, /**<  */
         };
-        
+
         /** Custom features bitmap definitions */
         enum CustomFeatures
         {
@@ -83,7 +83,7 @@ namespace mono { namespace redpine {
             ENABLE_PACKET_BUFFER_LIMIT  = 0x400000, /**<  */
             ENABLE_HTTP_AUTHENCICATION  = 0x800000  /**<  */
         };
-        
+
         /** The raw data struct */
         typedef struct __attribute__((packed))
         {
@@ -92,22 +92,22 @@ namespace mono { namespace redpine {
             uint32_t tcp_ip_feature_bit_map;
             uint32_t custom_feature_bit_map;
         } operModeFrameSnd;
-        
+
         /** The Wifi operation mode */
         WifiOperModes operMode;
-        
+
         /** The wireless co-existence mode */
         CoexModes coexMode;
-        
+
         /** Sets the opermode feature bitmap */
         Features featureBitmap;
-        
+
         /** Sets the opermodes TCP/IP feature bitmap */
         TcpIpFeatures tcpipFeatureBitmap;
-        
+
         /** Sets the opermode other custom features bitmap */
         CustomFeatures customFeatureBitmap;
-        
+
         /**
          * Construct a SetOperMode frame with a given operation mode
          * This will not set any coex modes of additional feature settings.
@@ -122,7 +122,7 @@ namespace mono { namespace redpine {
          * @param mode The module operation mode (Client, AP, etc.)
          */
         SetOperatingModeFrame(WifiOperModes mode);
-        
+
         /**
          * Set a standard Wifi only configuration. This means setting the
          * radio Co-Existence to Wifi-only. this method also sets the module
@@ -133,21 +133,21 @@ namespace mono { namespace redpine {
          * * DHCPv4 client enabled (not IPv6 DHCP)
          * * DNS client enabled
          * * Module respond in ICMP (ping)
-         * 
+         *
          * No further features are enabled. (@ref CustomFeatures)
          */
         void setDefaultConfiguration();
-        
+
         void dataPayload(uint8_t *dataBuffer);
     };
-    
-    
+
+
     /**
      * Command frame to send the Band command.
-     * This class contains the means to send the command with the needed 
+     * This class contains the means to send the command with the needed
      * payload data.
      *
-     * This command configures the band in which the module has to be 
+     * This command configures the band in which the module has to be
      * configured. The valid bands are:
      *
      * * 2.4 GHz
@@ -176,23 +176,23 @@ namespace mono { namespace redpine {
             uint8_t bandVal;        /**< 2.4 GHz, 5 GHz or dual band property */
             uint8_t alignment[3];   /**< Used only to align the data to 4-bytes */
         } bandFrameSnd;
-        
+
         /** The selected Band, default is 2.4 GHz */
         bandFrameSnd band;
-        
+
         /**
          * Construct a default band frame command that can be sent to the module.
          * The frame is initialized with the default band selected: 2.4 GHz
          */
         BandFrame();
-        
+
         void dataPayload(uint8_t *dataBuffer);
     };
-    
-    
+
+
     /**
      * Command Frame for initializing the module.
-     * 
+     *
      * This command programs the module’s Baseband and RF components and returns
      * the MAC address of the module to the host.
      *
@@ -208,31 +208,31 @@ namespace mono { namespace redpine {
             uint8_t macAddress[6];  /**< The MAC address of the module */
             uint8_t alignment[2];   /**< Used only to align the data to 4-bytes */
         } initFrameResponse;
-        
-        /** 
+
+        /**
          * The received MAC address for the module. This value is only present
          * after the command response has been parsed.
          */
         initFrameResponse response;
-        
+
         /**
          * Construct the object
          * The command takes no argumemts nor contain any properties.
          */
         InitFrame();
-        
+
         void responsePayloadHandler(uint8_t *payloadBuffer);
     };
-    
+
     /**
      * Scan command frame to sent to the module.
-     * 
-     * This command scans for Access Points and gives the scan results to the 
+     *
+     * This command scans for Access Points and gives the scan results to the
      * host. The scan results are sorted in decreasing order of signal strength
-     * (RSSI value). The scanned access point with highest signal strength will 
+     * (RSSI value). The scanned access point with highest signal strength will
      * be the first in the list.
      *
-     * The command response is a complex structure where the identofied AP 
+     * The command response is a complex structure where the identofied AP
      * networks are descibed.
      * The property `securityMode` is a number form 0 to 5 and defined as:
      *
@@ -244,20 +244,20 @@ namespace mono { namespace redpine {
      *       3        | WEP
      *       4        | WPA Enterprise
      *       5        | WPA2 Enterprise
-     * 
+     *
      *
      */
     class ScanFrame : public ManagementFrame
     {
     public:
-        
+
         /** Module defines the maximum length of a SSID name to be this value */
         static const int maxSsidLength = 34;
-        
+
         /** Module defines the maximum number of scan results as this number */
         static const int scannedMaximumResponse = 11;
-        
-        /** 
+
+        /**
          * Raw scan frame format, as sent to the module.
          * Structure ti 4-byte aligned
          */
@@ -269,8 +269,8 @@ namespace mono { namespace redpine {
             uint8_t     channel_bit_map_2_4[2]; /**< channel bit map for 2.4 Ghz */
             uint8_t     channel_bit_map_5[4];   /**< channel bit map for 5 Ghz */
         } scanFrameSnd;
-        
-        
+
+
         /** Command response structure, describing an identified AP */
         typedef struct
         {
@@ -282,7 +282,7 @@ namespace mono { namespace redpine {
             uint8_t bssid[6];           /**< MAC address of the access point */
             uint8_t reserved[2];        /**< Reserved bytes */
         } scanInfoResp;
-        
+
         /** The raw command response format, as returned by the module. */
         typedef struct
         {
@@ -290,31 +290,31 @@ namespace mono { namespace redpine {
             uint8_t  padding[4];                            /**< Reserved */
             scanInfoResp scanInfos[scannedMaximumResponse]; /**< List of results */
         } scanResponse;
-        
+
         /** Callback handler, used when the list of SSIDs are returned */
         mbed::FunctionPointerArg1<void, scanResponse*> scanResponseHandler;
 
         const char *ssid;
-        
+
         /**
          * The channel number to scan.
          * 0 means all channels.
          */
         uint32_t scanChannelNumber;
-        
+
         /** Construct a Scan command frame */
         ScanFrame();
-        
-        
+
+
         void dataPayload(uint8_t *dataBuffer);
-        
-        
+
+
         void responsePayloadHandler(uint8_t *dataBuffer);
 
         /**
          * @brief Set the ScanResponse callback function
          *
-         * When the scan for access points is completed, this handler is 
+         * When the scan for access points is completed, this handler is
          * triggered. You set your callback function here, to retrieve a list of
          * found APs.
          *
@@ -332,8 +332,8 @@ namespace mono { namespace redpine {
             this->scanResponseHandler.attach<Owner>(obj, memPtr);
         }
     };
-    
-    
+
+
     /**
      * this command frame will associate the module with an access point or
      * create one - depending on the operation mode settings.
@@ -366,24 +366,24 @@ namespace mono { namespace redpine {
             uint8_t ssid_len;
             uint8_t alignment[2];   /**< Needed for 4-byte alignment */
         } joinFrameSnd;
-        
+
         String ssid;
         String passphrase;
         int securityMode;
-        
+
         /**
          *
-         * 
+         *
          */
         JoinFrame(String ssid, String passphrase, int secMode = 6);
-        
+
         void dataPayload(uint8_t *dataBuffer);
     };
-    
-    
+
+
     /**
      * Command frame for the command "Set IP Parameters"
-     * 
+     *
      * This command configures the IP address, subnet mask and default gateway
      * for the module. Or activates DHCP client mode.
      *
@@ -396,13 +396,13 @@ namespace mono { namespace redpine {
      *      1     | DHCP Enabled, dynamic IP configuration
      *      3     | DHCP Enabled and send the hostname in DHCP discover (default)
      *
-     * The hostname is the identifier for the DHCP server, and can be maximum 
+     * The hostname is the identifier for the DHCP server, and can be maximum
      * 31 characters. The default hostname is "mono".
      */
     class SetIpParametersFrame : public ManagementFrame
     {
     public:
-        
+
         /** The raw frame payload data format */
         typedef struct
         {
@@ -412,7 +412,7 @@ namespace mono { namespace redpine {
             uint8_t gateway[4];
             uint8_t hostname[31];
         } ipparamFrameSnd;
-        
+
         /** The raw frame response payload */
         typedef struct
         {
@@ -421,7 +421,7 @@ namespace mono { namespace redpine {
             uint8_t netmask[4];
             uint8_t gateway[4];
         } ipparamFrameResp;
-        
+
         /** The available DHCP configuaration modes, bit map */
         enum dhcpModes
         {
@@ -429,65 +429,65 @@ namespace mono { namespace redpine {
             DHCP_ENABLE = 1,            /**< Enable the dhcp client, assign dynamic address */
             DHCP_HOSTNAME_ENABLE = 2    /**< Enable transmit of the hostname (default) */
         };
-        
+
         /** The maximum allowed hostname length */
         static const int maxHostnameLength = 31;
-        
+
         /** The hostname transmitted in DHCP mode */
         const char *hostname;
-        
+
         /**
          * Bit map of the dhcp configuration, with default constructor the mode
          * is: DHCP_ENABLE | DHCP_HOSTNAME_ENABLE
          */
         uint8_t dhcpMode;
-        
+
         /** Byte array with the static ip address, used only in STATIC_IP mode */
         uint8_t ipAddress[4];
-        
+
         /** Byte array with the ip netmask, used only in STATIC_IP mode */
         uint8_t netmask[4];
-        
+
         /** Byte array with the default gateway, used only in STATIC_IP mode */
         uint8_t gateway[4];
-        
+
         /** The mac address receive from the frame response */
         uint8_t macAddress[6];
-        
+
         /**
          * Construct a the command as dynamic ip (DHCP enabled) with hostname
          * "mono".
          */
         SetIpParametersFrame();
-        
+
         void dataPayload(uint8_t *dataBuffer);
-        
+
         void responsePayloadHandler(uint8_t *databuffer);
-        
+
     };
-    
-    
+
+
     /**
      * This command is to obtain the IP address of the specified domain name.
-     * 
+     *
      */
     class DnsResolutionFrame : public ManagementFrame
     {
     public:
-        
+
         /** The maximum length for a domain name to query */
         static const int maxDomainNameLength = 90;
-        
+
         /** raw frame payload Data, bytes appended for alignment. */
         typedef struct {
             uint16_t ip_version;                        /**< IP version, 4 or 6 */
             uint8_t aDomainName[maxDomainNameLength];   /**< The domain name to query */
             uint8_t reserved[4];                        /**< Reserved + 4-byte alignment */
         } dnsQryFrameSnd;
-        
+
         /** Maximum number of returned ip addresses */
         static const int maxDnsReply = 10;
-        
+
         /** Raw response frame payload data */
         typedef struct
         {
@@ -499,32 +499,85 @@ namespace mono { namespace redpine {
                 uint8_t ipv6_address[16];   /**< If IP version is 6, this is the IP address */
             } IpAddrs[maxDnsReply];         /**< The list of returned IP addresses */
         } TCP_EVT_DNS_Query_Resp;
-        
+
         /** The domain to lookup */
         String domain;
-        
+
         /**  Is `true` if DNS resolution is completed and successful. `false` otherwise. */
         bool respSuccess;
-        
+
         /** Either the IPc4 or IPv6 ip address, after dns resolution finised */
         uint8_t resIpAddress[16];
-        
+
         /** The IP version returned from resolution. Either 4 or 6 */
         uint8_t ipVersion;
-        
-        /** 
+
+        /**
          * Construct a new DNS query command.
          * Use the @ref commit() method to execute the resolution.
          *
          * @param domainName The domain name string to resolve
          */
         DnsResolutionFrame(String domainName);
-        
+
         void dataPayload(uint8_t *dataBuffer);
-        
+
         void responsePayloadHandler(uint8_t *databuffer);
     };
-    
+
+    /**
+     * This command is used to start up a TCP server socket that listen on
+     * the socket port for remote connection from a client socket.
+     * After recieving a remote connection from a client socket, the server
+     * will established the communication channel and data can be passed
+     * between the client and the server.
+     * The connection is closed by the client and the server will remove
+     * the communication channel when it reciev a close from the client.
+     *
+     * Due to limitation of the platform thread is not suported and therefor
+     * only one client can connect at a time.
+     */
+
+    class TcpServerFrame : public mono::redpine::ManagementFrame
+    {
+      public:
+        int port;
+        TcpServerFrame(int port) : ManagementFrame(SocketCreate)
+        {
+          this->responsePayload = true;
+          this->port = port;
+        }
+
+      int payloadLength()
+      {
+        // beregn størrelsen på payload struct'en
+        // fra side 157 i manualen
+        return ?;
+      }
+
+      void payloadData(uint_t *data)
+      {
+        // data er en pointer til det memory som skal indeholde
+        // structen fra side 157 i manualen.
+        // cast data til struct typen eller kopier fra en lokal
+        // kopi.
+
+        struct payloadStruct *payload = (struct payloadStruct*) data;
+        // ...
+      }
+
+      void responsePayloadHandler(uint_t *data)
+      {
+        // her kommer tcp socket create respons
+        // data pointeren indholder svar fra modulet, som angivet
+        // på side 161 i manualen.
+
+        struct svarStruct *resp = (struct svarStruct*) data;
+
+        // ...
+      }
+    };
+
     /**
      * This command is used to transmit HTTP GET request from the module to
      * a remote HTTP server. A subsequent HTTP GET request can be issued
@@ -536,7 +589,7 @@ namespace mono { namespace redpine {
     class HttpGetFrame : public ManagementFrame
     {
     public:
-        
+
         /** Data struct used in the DataReady callback function */
         typedef struct
         {
@@ -544,10 +597,10 @@ namespace mono { namespace redpine {
             uint8_t *data;          /**< A pointer to the data returned */
             HttpGetFrame *context;  /**< A pointer to the HttpGetFrame that triggered the callback */
         } CallbackData;
-        
+
         /** The maximum length of the TTP Request Buffer blob */
         static const int maxHttpBufferLength = 1200;
-        
+
         /** @brief List of possible Http Get options for the raw payload data format */
         enum GetOptions
         {
@@ -556,7 +609,7 @@ namespace mono { namespace redpine {
             ENABLE_SSL_TLS_1_0 = 4,     /**< Use SSL 1.0, available only when has SSL enabled */
             ENABLE_SSL_TLS_1_2 = 8      /**< Use SSL 1.2, available only when has SSL enabled */
         };
-        
+
         /** @brief Raw frame payload data */
         typedef struct
         {
@@ -565,7 +618,7 @@ namespace mono { namespace redpine {
             uint16_t http_port;     /**< server port number */
             uint8_t  buffer;        /**< Username, Password, Hostname, IP address, url, header, data */
         } __attribute__((packed)) HttpReqFrameSnd;
-        
+
         /** @brief The raw data response payload */
         typedef struct
         {
@@ -574,31 +627,31 @@ namespace mono { namespace redpine {
             uint32_t data_len;  /**< Lenght of current data chunk (bytes) */
             uint8_t  data;      /**< The current data chunk, max is 1400 bytes */
         } __attribute__((packed)) HttpRsp;
-        
+
         /** The HTTP servers hostname (for virtual hosts) */
         String hostname;
-        
+
         /** The server ip address as a string, ex: `192.168.1.10` */
         String ipaddress;
-        
+
         /** The URL to call, ex: `/index.html` */
         String url;
 
         /** The destination TCP/IP port */
         uint32_t httpPort;
-        
+
         /** Extra HTTP headers to sent along with the GET request. */
         String extraHeader;
-        
+
         /**
          * If this is set the HTTP Body is written to the file
          * If this is NULL, then nothing is obviosly written :-)
          */
         FILE *destinationFile;
-        
+
         /** Callback handler, used when no file pointer is given */
         mbed::FunctionPointerArg1<void, CallbackData*> dataReadyHandler;
-        
+
         /**
          * Construct a HTTP GET request frame
          *
@@ -608,22 +661,22 @@ namespace mono { namespace redpine {
          * @param serverPort The TCP/IP port where the server responds (Defaults to 80)
          */
         HttpGetFrame(String hostname, String serverIp, String Url, FILE *destFile, uint32_t serverPort = 80);
-        
+
         ~HttpGetFrame();
-        
+
         void dataPayload(uint8_t *data);
-        
+
         void responsePayloadHandler(uint8_t *data);
-        
+
         int payloadLength();
-        
+
         /**
          * @brief Set the DataReady callback function
-         * 
+         *
          * When you do not supply a `FILE` pointer, the HTTP body is returned
          * through a DataReady callback function. The function must take one parameter
          * that is of the type @ref HttpGetFrame::CallbackData .
-         * 
+         *
          * @param obj A pointer to the callback functions member context (the this pointer)
          * @param memPtr A point to the member function itself.
          */
@@ -633,8 +686,8 @@ namespace mono { namespace redpine {
             this->dataReadyHandler.attach<Owner>(obj, memPtr);
         }
     };
-    
-    
+
+
     class HttpPostFrame : public HttpGetFrame
     {
     public:
@@ -654,7 +707,7 @@ namespace mono { namespace redpine {
         int payloadLength();
     };
 
-    
+
     /**
      * Command to set the module into one of 5 power saving modes. Some modes is
      * used while connected to an AP, other are full sleep modes, where module is
@@ -674,13 +727,13 @@ namespace mono { namespace redpine {
      *
      * 0. module wakes up before nearest Beacon that does not exceed the specified
      *    listen interval time.
-     * 1. module wakes up before nearest DTIM Beacon that does not exceed the 
+     * 1. module wakes up before nearest DTIM Beacon that does not exceed the
      *    specified listen interval time.
      */
     class PowerModeFrame : public ManagementFrame
     {
     public:
-        
+
         /**
          * @brief The possible power save modes for the module
          * The following modes can be used while the module is connected to an AP,
@@ -701,7 +754,7 @@ namespace mono { namespace redpine {
             SLEEP_MODE_GPIO             = 8, /**< Full system sleep mode, AP not connected. GPIO wake up */
             SLEEP_MODE                  = 9  /**< Full system sleep, AP disconnected. Only timer wake up  */
         };
-        
+
         /**
          * Power modes. The power save modes can be further controlled by choosing
          * an ultro low power mode here.
@@ -715,9 +768,9 @@ namespace mono { namespace redpine {
             /** Ultra low power mode, without RAM retension (only save mode 8 & 9). */
             ULTRA_LOW_POWER_MODE_LOOSE_RAM = 2
         };
-        
+
     protected:
-        
+
         /** Redpine command struct for the powerMode frame */
         typedef struct {
             uint8_t powerVal;
@@ -725,44 +778,44 @@ namespace mono { namespace redpine {
             uint32_t listen_interval_dtim;
             uint8_t _alignment[2]; // struct must be 4-byte aligned
         } PowerFrameSnd;
-        
+
         PowerFrameSnd frame;
-        
+
         void dataPayload(uint8_t *data);
-        
+
     public:
-        
+
         /**
          * Construct a PowerModeFrame that will set the module into a low power mode,
          * or disabled any current low power mode set earlier.
-         * 
+         *
          * @param saveMode One of the 5 power save modes. See @ref PowerSaveModes
          * @param powMode Deide if power safe mode should be Ultra Low power or Low Power
          * @param dtimBeacon Decide whether the DTIM or Beason is used af wake up interval.
          */
         PowerModeFrame(PowerSaveModes saveMode, UltraLowPowerModes powMode, bool dtimBeacon);
     };
-    
-    
+
+
     class SetSleepTimerFrame : public ManagementFrame
     {
     protected:
-        
+
         struct SleepTimerFrameSnd {
             uint8_t TimeVal[2];
             uint8_t _alignment[2]; // struct must be 4-byte aligned
         };
-        
+
         struct SleepTimerFrameSnd frame;
-        
+
         void dataPayload(uint8_t *data);
-        
+
     public:
-        
+
         SetSleepTimerFrame(uint16_t sleepSecs);
     };
-    
-    
+
+
 }}
 
 #endif /* defined(__spiTest__redpine_command_frames__) */
