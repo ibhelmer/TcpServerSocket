@@ -541,12 +541,36 @@ namespace mono { namespace redpine {
     class TcpServerFrame : public mono::redpine::ManagementFrame
     {
       public:
+        /** Data structure used in the
+         */
+        #define WEBS_MAX_URL_LEN 51
+        #define WEBS_MAX_HOST_LEN 51
+        typedef struct {
+          uint8 ip_version[2];
+          uint8 socketType[2];
+          uint8 moduleSocket[2];
+          uint8 destSocket[2];
+          union{
+            uint8 ipv4_address[4];
+            uint32 ipv6_address[4];
+          } destIPaddr;
+          uint8 max_count[2];
+          uint8 tos[4];
+          uint8 ssl_ws_enable;
+          uint8 ssl_ciphers;
+          uint8 webs_resource_name[WEBS_MAX_URL_LEN];
+          uint8 webs_host_name[WEBS_MAX_HOST_LEN];
+          uint8 tcp_retry_count;
+          uint8 socket_bitmap;
+          uint8 rx_window_size;
+        } __attribute__((packed)) socketFrameSnd;
+
         int port;
         TcpServerFrame(int port);
         int payloadLength();
-        void payloadData(uint_t *data);
-        void responsePayloadHandler(uint_t *data);
-      
+        void payloadData(uint8_t *data);
+        void responsePayloadHandler(uint8_t *data);
+
     };
 
     /**

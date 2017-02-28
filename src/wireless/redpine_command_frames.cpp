@@ -237,26 +237,30 @@ void DnsResolutionFrame::responsePayloadHandler(uint8_t *databuffer)
 }
 // MARK: TCP SERVER SOCKET Frame
 
-void TcpServerFrame::TcpServerFrame(int port) : ManagementFrame(SocketCreate)
+TcpServerFrame::TcpServerFrame(int port) :
+  ManagementFrame(SocketCreate)
 {
   this->responsePayload = true;
   this->port = port;
 }
-int payloadLength()
+
+int TcpServerFrame::payloadLength()
 {
-  // beregn størrelsen på payload struct'en
-  // fra side 157 i manualen
-  return 10;
+  int size = sizeof(socketFrameSnd);
+  size += 1 + sizeof(int);
+  return (size+3) & ~3; // Align to 4 byte
 }
 
-void payloadData(uint_t *data)
+void TcpServerFrame::payloadData(uint8_t *data)
 {
-  // data er en pointer til det memory som skal indeholde
-  // structen fra side 157 i manualen.
-  // cast data til struct typen eller kopier fra en lokal
-  // kopi.
+  memset(data, 0, this->payloadLength());
 
-  struct payloadStruct *payload = (struct payloadStruct*) data;
+  socketFrameSnd *frm = (socketFrameSnd*) data;
+  frm->ip_version[0] = (uint8) 4;
+  frm->socketType[0] = (uint8) 2; // 2– TCP/SSL Server (Listening TCP)
+  frm->moduleSocket[0] = (uint8) this->port;
+
+    struct payloadStruct *payload = (struct payloadStruct*) data;
   // ...
 }
 
